@@ -8,7 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Products;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
 #[Route('/api', name: 'api_')]
 class ProductsController extends AbstractController
@@ -30,7 +30,9 @@ class ProductsController extends AbstractController
            ];
         }
    
-        return $this->json($data);
+        return $this->json([
+            "data" => $data
+        ], 202);
     }
 
     #[Route('/products', name: 'products_create', methods:['post'] )]
@@ -38,24 +40,32 @@ class ProductsController extends AbstractController
     {
         $entityManager = $doctrine->getManager();
    
-        $product = new Products();
-        $data = json_decode($request->getContent(), true);
-        $product->setSku($data['sku']);
-        $product->setName($data['name']);
-        $product->setDescription($data['description']);
-
-        $entityManager->persist($product);
-        $entityManager->flush();
+        try{
+            $product = new Products();
+            $data = json_decode($request->getContent(), true);
+            
+            $product->setSku($data['sku']);
+            $product->setName($data['name']);
+            $product->setDescription($data['description']);
     
-        $data =  [
-            'id' => $product->getId(),
-            'sku' => $product->getSku(),
-            'name' => $product->getName(),
-            'description' => $product->getDescription(),
-        ];
-                
-        return $this->json($data);
-        
+            $entityManager->persist($product);
+            $entityManager->flush();
+            $data =  [
+                'id' => $product->getId(),
+                'sku' => $product->getSku(),
+                'name' => $product->getName(),
+                'description' => $product->getDescription(),
+            ];
+                    
+            return $this->json([
+                "data" => $data
+            ]);
+        }
+        catch (\Exception $e) {
+            return $this->json([
+                "error" => $e->getMessage()
+            ]);
+        }
     }
 
     #[Route('/products/{id}', name: 'product_show', methods:['get'] )]
@@ -75,7 +85,9 @@ class ProductsController extends AbstractController
             'description' => $product->getDescription(),
         ];
            
-        return $this->json($data);
+        return $this->json([
+            "data" => $data
+        ]);
     }
  
     #[Route('/products/{id}', name: 'product_update', methods:['put', 'patch'] )]
@@ -102,7 +114,9 @@ class ProductsController extends AbstractController
             'description' => $product->getDescription(),
         ];
            
-        return $this->json($data);
+        return $this->json([
+            "data" => $data
+        ]);
     }
  
     #[Route('/products/{id}', name: 'product_delete', methods:['delete'] )]

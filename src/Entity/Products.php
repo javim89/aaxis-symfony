@@ -5,12 +5,13 @@ namespace App\Entity;
 use App\Repository\ProductsRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Constraints\UniqueEntity;
 
 #[ORM\Entity(repositoryClass: ProductsRepository::class)]
+#[UniqueEntity("sku")]
 class Products
 {
     use TimestampableEntity;
@@ -21,6 +22,7 @@ class Products
     private ?int $id = null;
     
     #[ORM\Column(length: 50, unique: true)]
+    #[Assert\UniqueEntity]
     private ?string $sku = null;
 
     #[ORM\Column(length: 250)]

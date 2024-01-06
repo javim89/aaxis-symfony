@@ -39,26 +39,28 @@ class ProductsController extends AbstractController
     public function create(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         $entityManager = $doctrine->getManager();
-   
+        
+        $requestData = json_decode($request->getContent(), true);
+        $createdProducts = [];
         try{
-            $product = new Products();
-            $data = json_decode($request->getContent(), true);
-            
-            $product->setSku($data['sku']);
-            $product->setName($data['name']);
-            $product->setDescription($data['description']);
-    
-            $entityManager->persist($product);
+            foreach ($requestData as $data) {
+                $product = new Products();
+                $product->setSku($data['sku']);
+                $product->setName($data['name']);
+                $product->setDescription($data['description'] ?? null);
+        
+                $entityManager->persist($product);
+                $createdProducts[] = [
+                    'id' => $product->getId(),
+                    'sku' => $product->getSku(),
+                    'name' => $product->getName(),
+                    'description' => $product->getDescription(),
+                ];
+                
+            }
             $entityManager->flush();
-            $data =  [
-                'id' => $product->getId(),
-                'sku' => $product->getSku(),
-                'name' => $product->getName(),
-                'description' => $product->getDescription(),
-            ];
-                    
             return $this->json([
-                "data" => $data
+                "data" => $createdProducts
             ]);
         }
         catch (\Exception $e) {
@@ -90,33 +92,38 @@ class ProductsController extends AbstractController
         ]);
     }
  
-    #[Route('/products/{id}', name: 'product_update', methods:['put', 'patch'] )]
-    public function update(ManagerRegistry $doctrine, Request $request, int $id): JsonResponse
+    #[Route('/products', name: 'product_update', methods:['put', 'patch'] )]
+    public function update(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         $entityManager = $doctrine->getManager();
-        $product = $entityManager->getRepository(Products::class)->find($id);
-   
-        if (!$product) {
-            return $this->json('No product found for id' . $id, 404);
-        }
-   
-        $data = json_decode($request->getContent(), true);
-        $product->setSku($data['sku']);
-        $product->setName($data['name']);
-        $product->setDescription($data['description']);
+        $requestData = json_decode($request->getContent(), true);
+        $updatedProducts = [];
+        try {
+            foreach ($requestData as $data) {
+                $product = $entityManager->getRepository(Products::class)->findOneBy(['sku' => $data['sku']]);
+                if (!$product) {
+                    return $this->json('No product found for sku ' . $data['sku'], 404);
+                }
+                $product->setName($data['name']);
+                $product->setDescription($data['description'] ?? null);
+
+                $updatedProducts[] = [
+                    'id' => $product->getId(),
+                    'sku' => $product->getSku(),
+                    'name' => $product->getName(),
+                    'description' => $product->getDescription(),
+                ];
+            }
+            $entityManager->flush();
         
-        $entityManager->flush();
-   
-        $data =  [
-            'id' => $product->getId(),
-            'sku' => $product->getSku(),
-            'name' => $product->getName(),
-            'description' => $product->getDescription(),
-        ];
-           
-        return $this->json([
-            "data" => $data
-        ]);
+            return $this->json([
+                "data" => $updatedProducts
+            ]);
+        }catch (\Exception $e) {
+            return $this->json([
+                "error" => $e->getMessage()
+            ]);
+        }
     }
  
     #[Route('/products/{id}', name: 'product_delete', methods:['delete'] )]

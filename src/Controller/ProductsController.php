@@ -88,8 +88,11 @@ class ProductsController extends AbstractController
             return $this->json('No product found for id' . $id, 404);
         }
    
-        $product->setName($request->request->get('name'));
-        $product->setDescription($request->request->get('description'));
+        $data = json_decode($request->getContent(), true);
+        $product->setSku($data['sku']);
+        $product->setName($data['name']);
+        $product->setDescription($data['description']);
+        
         $entityManager->flush();
    
         $data =  [

@@ -9,11 +9,20 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use App\Entity\User;
+use Nelmio\ApiDocBundle\Annotation as Nelmio;
+use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Response;
 
 #[Route('/api', name: 'api_')]
 class RegistrationController extends AbstractController
 {
     #[Route('/register', name: 'register', methods: 'post')]
+    #[OA\RequestBody(required: true, content: new OA\JsonContent(ref: "#/components/schemas/RegisterRequest"))]
+    #[OA\Response(
+        response: Response::HTTP_CREATED,
+        description: "Registered Successfully",
+        content: null
+    )]
     public function index(ManagerRegistry $doctrine, Request $request, UserPasswordHasherInterface $passwordHasher): JsonResponse
     {
         $em = $doctrine->getManager();

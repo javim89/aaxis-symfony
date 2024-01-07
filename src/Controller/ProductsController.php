@@ -9,11 +9,23 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Products;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Nelmio\ApiDocBundle\Annotation as Nelmio;
+use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\Response;
 
 #[Route('/api', name: 'api_')]
 class ProductsController extends AbstractController
 {
     #[Route('/products', name: 'products_index', methods:["get"])]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: "Product list",
+        content: new OA\JsonContent(
+            type: "array",
+            items: new OA\Items(ref: "#/components/schemas/ProductResponse")
+        )
+    )]
+    // #[Nelmio\Security(name: 'Bearer')]
     public function index(ManagerRegistry $doctrine): JsonResponse
     {
         $products = $doctrine
@@ -36,6 +48,18 @@ class ProductsController extends AbstractController
     }
 
     #[Route('/products', name: 'products_create', methods:['post'] )]
+    #[OA\RequestBody(required: true, content: new OA\JsonContent(
+        type: "array",
+        items: new OA\Items(ref: "#/components/schemas/ProductRequest")
+    ))]
+    #[OA\Response(
+        response: Response::HTTP_CREATED,
+        description: "Products created",
+        content: new OA\JsonContent(
+            type: "array",
+            items: new OA\Items(ref: "#/components/schemas/ProductResponse")
+        )
+    )]
     public function create(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         $entityManager = $doctrine->getManager();
@@ -71,6 +95,11 @@ class ProductsController extends AbstractController
     }
 
     #[Route('/products/{id}', name: 'product_show', methods:['get'] )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: "Product details",
+        content: new OA\JsonContent(ref: "#/components/schemas/ProductResponse")
+    )]
     public function show(ManagerRegistry $doctrine, int $id): JsonResponse
     {
         $product = $doctrine->getRepository(Products::class)->find($id);
@@ -93,6 +122,18 @@ class ProductsController extends AbstractController
     }
  
     #[Route('/products', name: 'product_update', methods:['put', 'patch'] )]
+    #[OA\RequestBody(required: true, content: new OA\JsonContent(
+        type: "array",
+        items: new OA\Items(ref: "#/components/schemas/ProductRequest")
+    ))]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: "Products updated",
+        content: new OA\JsonContent(
+            type: "array",
+            items: new OA\Items(ref: "#/components/schemas/ProductResponse")
+        )
+    )]
     public function update(ManagerRegistry $doctrine, Request $request): JsonResponse
     {
         $entityManager = $doctrine->getManager();
@@ -127,6 +168,11 @@ class ProductsController extends AbstractController
     }
  
     #[Route('/products/{id}', name: 'product_delete', methods:['delete'] )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: "Products deleted",
+        content: null
+    )]
     public function delete(ManagerRegistry $doctrine, int $id): JsonResponse
     {
         $entityManager = $doctrine->getManager();

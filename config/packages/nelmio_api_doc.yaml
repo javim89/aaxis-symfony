@@ -1,0 +1,36 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Aaxis products
+            description: This is an app for Aaxis
+            version: 1.0.0
+        components:
+            schemas:
+                ProductRequest:
+                    type: object
+                    properties:
+                        sku: { type: string, example: "AAABCD123"}
+                        name: { type: string, example: "name of the product"}
+                        description: { type: string, example: "description of the product"}
+                ProductResponse:
+                    type: object
+                    properties:
+                        id: { type: number, example: 1}
+                        sku: { type: string, example: "AAABCD123"}
+                        name: { type: string, example: "name of the product"}
+                        description: { type: string, example: "description of the product"}
+                RegisterRequest:
+                    type: object
+                    properties:
+                        email: { type: string, example: "javi@aaxis.com"}
+                        password: { type: string, example: "JaviAaxis"}
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+        security:
+            - Bearer: []
+    areas: # to filter documented areas
+        path_patterns:
+            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc

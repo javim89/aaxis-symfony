@@ -36,18 +36,30 @@ Asegúrate de tener instalados los siguientes requisitos antes de comenzar:
     ```
 ## Configuración de la base de datos
 
-1. Crea la base de datos especificada en tu archivo .env::
+1. Crea la base de datos especificada en tu archivo .env:
     ```bash
     php bin/console doctrine:database:create
     ```
-2. Ejecuta las migraciones para crear las tablas de la base de datos::
+2. Ejecuta las migraciones para crear las tablas de la base de datos:
     ```bash
     php bin/console doctrine:migrations:migrate
     ```
 
 ## Ejecucion servidor local
-Para iniciar el servidor de desarrollo de Symfony, ejecuta el siguiente comando:
 
+1. Para iniciar el servidor de desarrollo de Symfony, ejecuta el siguiente comando:
     ```bash
     symfony server:start
+    ```
+2. Dar de alta un usuario (pasar email y password en el payload):
+   ```bash
+    localhost:8000/register
+    ```
+3. Login (pasar email y password en el payload)
+   ```bash
+    localhost:8000/login
+    ```
+4. Swagger de la app
+   ```bash
+    localhost:8000/api/doc
     ```
